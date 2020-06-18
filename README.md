@@ -7,7 +7,7 @@
 Conectar o container do YCSB na mesma rede de overlay que a stack do Cassandra está conectada
 
 ```
-docker run --network=cassandra-net -dt lucasfs/ycsb-benchmark bash
+docker run --name ycsb --network=cassandra-net -dt lucasfs/ycsb-benchmark bash
 ```
 
 ### 3. Criar keyspace e a tabela para o benchmark
