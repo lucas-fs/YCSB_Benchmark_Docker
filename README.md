@@ -37,7 +37,7 @@ Para criar o keyspace `ycsb`, e a tabela `usertable`:
 ### 4. Load do datasset para o benchmark:
 
 ```
-ycsb load cassandra-cql -s -p hosts="15.0.0.1" -P workloads/workloada
+ycsb load cassandra-cql -s -p hosts="15.0.0.1" -P $YCSB_HOME/workloads/workloada -cp $CLASSPATH
 ```
 
 Se as seguintes mensagens forem apresentadas:
