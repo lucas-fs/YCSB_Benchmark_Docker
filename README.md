@@ -2,7 +2,15 @@
 
 ### 1. Deploy da stack do Cassandra
 
-### 2. Criar keyspace e a tabela para o benchmark
+### 2. Executar Docker container do YCSB
+
+Conectar o container do YCSB na mesma rede de overlay que a stack do Cassandra está conectada
+
+```
+docker run --name ycsb --network=cassandra-net -dt lucasfs/ycsb-benchmark bash
+```
+
+### 3. Criar keyspace e a tabela para o benchmark
 
 Para criar o keyspace `ycsb`, e a tabela `usertable`:
 
@@ -26,10 +34,10 @@ Para criar o keyspace `ycsb`, e a tabela `usertable`:
 
 **Note que as configurações para `replication_factor` e os "`consistency levels`" afetam no desempenho do Cassandra.**
 
-### 3. Load do datasset para o benchmark:
+### 4. Load do datasset para o benchmark:
 
 ```
-ycsb load cassandra-cql -s -p hosts="15.0.0.1" -P workloads/workloada
+ycsb load cassandra-cql -s -p hosts="15.0.0.1" -P $YCSB_HOME/workloads/workloada -cp $CLASSPATH
 ```
 
 Se as seguintes mensagens forem apresentadas:
@@ -50,4 +58,4 @@ e os inclua no parâmetro de classpath (-cp) no momento da execução.
 ycsb load cassandra-cql -p hosts="15.0.0.1" -P workloads/workloada -cp $YCSB_HOME/slf4j-api-1.7.30.jar:$YCSB_HOME/slf4j-simple-1.7.30.jar
 ```
 
-### 4. Execute o benchmark para os `workloads` desejados
+### 5. Execute o benchmark para os `workloads` desejados
