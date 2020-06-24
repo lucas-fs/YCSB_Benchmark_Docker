@@ -28,3 +28,5 @@ cqlsh $node_ip -p9042 --cqlversion=3.4.4 -e "create keyspace ycsb
         field9 varchar);"
 
 $YCSB_HOME/bin/ycsb load cassandra-cql -s -p hosts="$node_ip" -P $YCSB_HOME/workloads/workload$workload -p recordcount=$recordcount -cp $CLASSPATH > /ycsb_output/out-$replicas-$recordcount-$workload.txt 2>&1
+
+chmod 777 /ycsb_output/out-$replicas-$recordcount-$workload.txt
