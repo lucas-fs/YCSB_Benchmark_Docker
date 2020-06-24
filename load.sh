@@ -4,14 +4,14 @@ workload=$1
 recordcount=$2
 replicas=$3
 
-echo "geting seed ip..."
+echo "[Load Script] Getting a node ip..."
 node_ip=`getent hosts tasks.seed | awk '{print $1}'| head -n 1`
-echo "seed node ip: $node_ip"
+echo "[Load Script] Node ip: $node_ip"
 
-echo "Drop keyspace"
-cqlsh $node_ip -p9042 --cqlversion=3.4.4 -e "DROP keyspace IF EXISTS ycsb;"
-echo "Recreate keyspace"
-cqlsh $node_ip -p9042 --cqlversion=3.4.4 -e "create keyspace ycsb
+echo "[Load Script] Dropping ycsb keyspace"
+cqlsh $node_ip -p9042 --cqlversion=3.4.4 --connect-timeout=10 -e "DROP keyspace IF EXISTS ycsb;"
+echo "[Load Script] Recreating ycsb keyspace"
+cqlsh $node_ip -p9042 --cqlversion=3.4.4 --connect-timeout=10 -e "create keyspace ycsb
         WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': 3 }; 
         USE ycsb; 
         create table usertable (
@@ -27,6 +27,9 @@ cqlsh $node_ip -p9042 --cqlversion=3.4.4 -e "create keyspace ycsb
         field8 varchar,
         field9 varchar);"
 
-$YCSB_HOME/bin/ycsb load cassandra-cql -s -p hosts="$node_ip" -P $YCSB_HOME/workloads/workload$workload -p recordcount=$recordcount -cp $CLASSPATH > /ycsb_output/out-$replicas-$recordcount-$workload.txt 2>&1
+echo "[Load Script] Performing load..."
+$YCSB_HOME/bin/ycsb load cassandra-cql -s -p hosts="$node_ip" -P $YCSB_HOME/workloads/workload$workload -p recordcount=$recordcount -p rectime=3000 -cp $CLASSPATH > /ycsb_output/out-load-$replicas-$recordcount-$workload.txt 2>&1
 
-chmod 777 /ycsb_output/out-$replicas-$recordcount-$workload.txt
+chmod 777 /ycsb_output/out-load-$replicas-$recordcount-$workload.txt
+
+echo "[Load Script] Load finished!"
