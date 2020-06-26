@@ -1,12 +1,10 @@
 #!/bin/bash
 
-workload=$1
-recordcount=$2
-replicas=$3
+node_ip=$1
+workload=$2
+recordcount=$3
+replicas=$4
 
-echo "[Load Script] Getting a node ip..."
-node_ip=`getent hosts tasks.seed | awk '{print $1}'| head -n 1`
-echo "[Load Script] Node ip: $node_ip"
 
 echo "[Load Script] Dropping ycsb keyspace"
 cqlsh $node_ip -p9042 --cqlversion=3.4.4 --connect-timeout=10 -e "DROP keyspace IF EXISTS ycsb;"
