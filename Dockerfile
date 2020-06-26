@@ -36,3 +36,8 @@ RUN mkdir /ycsb_output \
 
 VOLUME /ycsb_output
 
+COPY execute.sh /
+COPY load.sh /
+
+RUN chmod +x /execute.sh
+RUN chmod +x /load.sh
