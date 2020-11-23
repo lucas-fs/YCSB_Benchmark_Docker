@@ -59,7 +59,8 @@ do
         WHERE srvname not like '%master%' 
             AND srvoptions[2] = 'host=$ip';"
     
-    shard=$(execute_query "$SQL_GET_SHARD" $MASTER_IP | grep '^ [0-9]')
+    query_result=$(execute_query "$SQL_GET_SHARD" $MASTER_IP | grep '^ [0-9]')
+    shard=${query_result//[[:blank:]]/}
 
     NODE_SHARD_NAME=$TABLE_NAME"_shard_"$shard
     SQL_DROP_SHARD="DROP TABLE IF EXISTS $NODE_SHARD_NAME;"

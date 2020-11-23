@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#TODO: Ajustar remoção das foreign tables
 node_ip=$1
 workload=$2
 recordcount=$3
