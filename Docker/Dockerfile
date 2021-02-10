@@ -7,6 +7,8 @@ ENV YCSB_VERSION 0.18.0
 ENV YCSB_HOME /opt/ycsb
 ENV JDBC_HOME /opt/ycsb/jdbc-binding
 
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE 1
+
 RUN curl --progress-bar -Lo /tmp/ycsb-${YCSB_VERSION}.tar.gz https://github.com/lucas-fs/YCSB/releases/download/${YCSB_VERSION}/ycsb-${YCSB_VERSION}.tar.gz \
     && cd /opt \
     && tar -xvf /tmp/ycsb-${YCSB_VERSION}.tar.gz \
@@ -23,30 +25,36 @@ RUN set -eux; \
 	wget \
 	ssh \	
 	git \
-	postgresql-client-11 \
+	gnupg2 \
 	python2.7 \
 	python-setuptools \
 	python-pip \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
+# Install PostgreSQL client version 12
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+
+RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' | \
+	tee  /etc/apt/sources.list.d/pgdg.list
+
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
+	postgresql-client-12 \
+	; \
+	rm -rf /var/lib/apt/lists/*
+
+# Install Cassandra client (cqlsh)
 RUN pip install cqlsh
 
+# Create alias for ycsb and export classpath
 RUN echo 'alias ycsb="$YCSB_HOME/bin/ycsb"' >> /root/.bashrc
 ENV CLASSPATH=$YCSB_HOME/slf4j-api-1.7.30.jar:$YCSB_HOME/slf4j-simple-1.7.30.jar:$JDBC_HOME/lib/postgresql-42.2.14.jar
 
-RUN mkdir /ycsb_output \
-	&& chmod 777 /ycsb_output
+# Create volumes for outputs and scripts
+RUN mkdir /ycsb_output /scripts \
+	&& chmod 777 /ycsb_output /scripts
 
 VOLUME /ycsb_outputs
 VOLUME /scripts
-
-# COPY cassandra_run.sh /
-# COPY cassandra_load.sh /
-# COPY postgres_run.sh /
-# COPY postgres_load.sh /
-
-# RUN chmod +x /cassandra_run.sh
-# RUN chmod +x /cassandra_load.sh
-# RUN chmod +x /postgres_run.sh
-# RUN chmod +x /postgres_load.sh
