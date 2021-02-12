@@ -53,8 +53,8 @@ RUN echo 'alias ycsb="$YCSB_HOME/bin/ycsb"' >> /root/.bashrc
 ENV CLASSPATH=$YCSB_HOME/slf4j-api-1.7.30.jar:$YCSB_HOME/slf4j-simple-1.7.30.jar:$JDBC_HOME/lib/postgresql-42.2.14.jar
 
 # Create volumes for outputs and scripts
-RUN mkdir /ycsb_output /scripts \
-	&& chmod 777 /ycsb_output /scripts
+RUN mkdir /ycsb_outputs /scripts \
+	&& chmod 777 /ycsb_outputs /scripts
 
 VOLUME /ycsb_outputs
 VOLUME /scripts
