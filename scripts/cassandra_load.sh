@@ -4,6 +4,7 @@ node_ip=$1
 workload=$2
 recordcount=$3
 replicas=$4
+rf=$5
 
 
 echo "[LOAD Script] Dropping ycsb keyspace"
@@ -15,7 +16,7 @@ sleep 10
 echo "[LOAD Script] Recreating ycsb keyspace"
 cqlsh $node_ip -p9042 --cqlversion=3.4.4 --connect-timeout=10 \
     -e "create keyspace ycsb
-    WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': 3 }; 
+    WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': $rf }; 
     USE ycsb; 
     create table usertable (
     y_id varchar primary key,
@@ -42,11 +43,11 @@ $YCSB_HOME/bin/ycsb load cassandra-cql -s \
 -p rectime=3000 \
 -p cassandra.connecttimeoutmillis=60000 \
 -p cassandra.readtimeoutmillis=60000 \
--p cassandra.readconsistencylevel=QUORUM \
--p cassandra.writeconsistencylevel=QUORUM \
+-p cassandra.readconsistencylevel=ONE \
+-p cassandra.writeconsistencylevel=ONE \
 -cp $CLASSPATH \
-> /ycsb_outputs/out-load-$replicas-$recordcount-$workload.txt 2>&1
+> /ycsb_outputs/out-load-$replicas-$recordcount-rf$rf-$workload.txt 2>&1
 
-chmod 777 /ycsb_outputs/out-load-$replicas-$recordcount-$workload.txt
+chmod 777 /ycsb_outputs/out-load-$replicas-$recordcount-rf$rf-$workload.txt
 
 echo "[Load Script] Load finished!"
