@@ -18,7 +18,7 @@ RUN curl --progress-bar -Lo /tmp/ycsb-${YCSB_VERSION}.tar.gz https://github.com/
     && mv ycsb-${YCSB_VERSION}-SNAPSHOT /opt/ycsb \
     && curl --progress-bar -Lo ${YCSB_HOME}/slf4j-api-1.7.30.jar https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar \
     && curl --progress-bar -Lo ${YCSB_HOME}/slf4j-simple-1.7.30.jar https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar \
-	&& curl --progress-bar -Lo ${JDBC_HOME}/lib/postgresql-42.2.14.jar https://jdbc.postgresql.org/download/postgresql-42.2.14.jar \
+	&& curl --progress-bar -Lo ${JDBC_HOME}/lib/postgresql-42.2.23.jar https://jdbc.postgresql.org/download/postgresql-42.2.23.jar \
     && rm -rf /tmp/ycsb-${YCSB_VERSION}.tar.gz \
 	&& rm -rf /tmp/hbase-${HBASE_CLIENT_VERSION}-client-bin.tar.gz
 
@@ -36,7 +36,7 @@ RUN set -eux; \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
-# Install PostgreSQL client version 12
+# Install PostgreSQL client version 13
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' | \
@@ -45,7 +45,7 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' | \
 RUN set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
-	postgresql-client-12 \
+	postgresql-client-13 \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
