@@ -21,7 +21,7 @@ rm $JDBC_HOME/conf/db.properties
 echo -e "$db_conf" > $JDBC_HOME/conf/db.properties
 
 echo "[LOAD Script] Call shard_table.sh script to create usertable sharded"
-./shard_table.sh postgres postgres $node_ip $replicas
+/scripts/shard_table.sh postgres postgres $node_ip $replicas
 sleep 300
 
 echo "[LOAD Script] Performing load..."
