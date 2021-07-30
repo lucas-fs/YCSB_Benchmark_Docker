@@ -25,8 +25,8 @@ echo "[LOAD Script] Call shard_table.sh script to create usertable sharded"
 sleep 300
 
 echo "[LOAD Script] Performing load..."
-$YCSB_HOME/bin/ycsb load jdbc -s -P $YCSB_HOME/workloads/workload$workload -P $JDBC_HOME/conf/db.properties -cp $CLASSPATH -p recordcount=$recordcount -p operationcount=10000 > /ycsb_output/out-load-$replicas-$recordcount-$workload-$b_size.txt 2>&1
+$YCSB_HOME/bin/ycsb load jdbc -s -P $YCSB_HOME/workloads/workload$workload -P $JDBC_HOME/conf/db.properties -cp $CLASSPATH -p recordcount=$recordcount -p operationcount=10000 > /ycsb_outputs/out-load-$replicas-$recordcount-$workload-$b_size.txt 2>&1
 
-chmod 777 /ycsb_output/out-load-$replicas-$recordcount-$workload-$b_size.txt
+chmod 777 /ycsb_outputs/out-load-$replicas-$recordcount-$workload-$b_size.txt
 
 echo "[LOAD Script] Load finished!"
