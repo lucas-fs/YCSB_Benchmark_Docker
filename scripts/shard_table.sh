@@ -11,8 +11,8 @@ execute_query(){
 
 PG_USER=$1
 PG_PASS=$2
-MASTER_IP=$3
-NODE_COUNT=$4
+COORDINATOR_IP=$3
+SHARD_COUNT=$4
 
 DATABASE="ycsb"
 TABLE_NAME="usertable"
@@ -32,70 +32,45 @@ SQL_CREATE_TABLE="\
     FIELD8 TEXT, FIELD9 TEXT) 
     PARTITION BY HASH (YCSB_KEY);"
 
-
-MASTER_SHARD_NAME=$TABLE_NAME"_shard_00"
-SQL_MASTER_SHARD="\
-    CREATE TABLE $MASTER_SHARD_NAME 
-    PARTITION OF $TABLE_NAME 
-    FOR VALUES WITH (modulus $NODE_COUNT, remainder 0);"
-
 # Drop usertable if exists
-echo "Drop usertable if exists on MASTER node [ $MASTER_IP ]"
-execute_query "$SQL_DROP" $MASTER_IP
+echo "Drop usertable if exists on COORDINATOR node [ $COORDINATOR_IP ]"
+execute_query "$SQL_DROP" $COORDINATOR_IP
 
 # Create patitioned usertable
-echo "Create patitioned usertable on MASTER node [ $MASTER_IP ]"
-execute_query "$SQL_CREATE_TABLE" $MASTER_IP
-
-# Create Master shard
-echo "Create Master shard table on MASTER node [ $MASTER_IP ]"
-execute_query "$SQL_MASTER_SHARD" $MASTER_IP
+echo "Create patitioned usertable on COORDINATOR node [ $COORDINATOR_IP ]"
+execute_query "$SQL_CREATE_TABLE" $COORDINATOR_IP
 
 tasks_ips=( `getent hosts tasks.$SHARD_SERVICE | awk '{print $1}'` )
-echo "Shard nodes IP list:\n$tasks_ips"
+echo "Shard nodes IP list:"
+getent hosts tasks.$SHARD_SERVICE | awk '{print $1}'
 
 shard_n=0
 for ip in "${tasks_ips[@]}"
 do
-    ((shard_n++))
-
     SQL_GET_SHARD="\
         SELECT replace(srvname, 'shard_', '') as name 
         FROM pg_foreign_server 
-        WHERE srvname not like '%master%' 
+        WHERE srvname not like '%coordinator%' 
             AND srvoptions[2] = 'host=$ip';"
     
-    query_result=$(execute_query "$SQL_GET_SHARD" $MASTER_IP | grep '^ [0-9]')
+    query_result=$(execute_query "$SQL_GET_SHARD" $COORDINATOR_IP | grep '^ [0-9]')
     shard=${query_result//[[:blank:]]/}
 
     NODE_SHARD_NAME=$TABLE_NAME"_shard_"$shard
-    SQL_DROP_SHARD="DROP TABLE IF EXISTS $NODE_SHARD_NAME;"
-    SQL_NODE_SHARD="\
-        CREATE TABLE $NODE_SHARD_NAME(
-        YCSB_KEY VARCHAR (255),
-        FIELD0 TEXT, FIELD1 TEXT,
-        FIELD2 TEXT, FIELD3 TEXT,
-        FIELD4 TEXT, FIELD5 TEXT,
-        FIELD6 TEXT, FIELD7 TEXT,
-        FIELD8 TEXT, FIELD9 TEXT);"
-
-    echo "Drop shard table on SHARD node [ $ip ]"
-    execute_query "$SQL_DROP_SHARD" $ip
-
-    echo "Create shard table on SHARD node [ $ip ]"
-    execute_query "$SQL_NODE_SHARD" $ip
 
     SQL_DROP_FT="DROP FOREIGN TABLE IF EXISTS $NODE_SHARD_NAME;"
     SQL_FOREIGN_TABLE="\
         CREATE FOREIGN TABLE $NODE_SHARD_NAME 
         PARTITION OF $TABLE_NAME 
-        FOR VALUES WITH (modulus $NODE_COUNT, remainder $shard_n) 
-        SERVER shard_$shard;"
+        FOR VALUES WITH (modulus $SHARD_COUNT, remainder $shard_n) 
+        SERVER shard_$shard OPTIONS(table_name '$TABLE_NAME');"
 
-    echo "Drop foreign table [ $NODE_SHARD_NAME ] on MASTER node [ $MASTER_IP ]"
-    execute_query "$SQL_DROP_FT" $MASTER_IP
+    echo "Drop foreign table [ $NODE_SHARD_NAME ] on COORDINATOR node [ $COORDINATOR_IP ]"
+    execute_query "$SQL_DROP_FT" $COORDINATOR_IP
     
-    echo "Create foreign table [ $NODE_SHARD_NAME ] on MASTER node [ $MASTER_IP ]"
-    execute_query "$SQL_FOREIGN_TABLE" $MASTER_IP
+    echo "Create foreign table [ $NODE_SHARD_NAME ] on COORDINATOR node [ $COORDINATOR_IP ]"
+    execute_query "$SQL_FOREIGN_TABLE" $COORDINATOR_IP
+
+    ((shard_n++))
 
 done
