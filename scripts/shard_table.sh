@@ -57,6 +57,21 @@ do
     shard=${query_result//[[:blank:]]/}
 
     NODE_SHARD_NAME=$TABLE_NAME"_shard_"$shard
+    SQL_DROP_SHARD="DROP TABLE IF EXISTS $TABLE_NAME;"
+    SQL_NODE_SHARD="\
+        CREATE TABLE $TABLE_NAME(
+        YCSB_KEY VARCHAR (255),
+        FIELD0 TEXT, FIELD1 TEXT,
+        FIELD2 TEXT, FIELD3 TEXT,
+        FIELD4 TEXT, FIELD5 TEXT,
+        FIELD6 TEXT, FIELD7 TEXT,
+        FIELD8 TEXT, FIELD9 TEXT);"
+
+    echo "Drop shard table on SHARD node [ $ip ]"
+    execute_query "$SQL_DROP_SHARD" $ip
+
+    echo "Create shard table on SHARD node [ $ip ]"
+    execute_query "$SQL_NODE_SHARD" $ip
 
     SQL_DROP_FT="DROP FOREIGN TABLE IF EXISTS $NODE_SHARD_NAME;"
     SQL_FOREIGN_TABLE="\
